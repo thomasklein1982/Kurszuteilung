@@ -81,3 +81,30 @@ app.component('Listbox',Listbox);
 app.component('TextArea',TextArea);
 
 window.app=app.mount('#app');
+
+function random(from,to){
+  return Math.floor(Math.random()*(to-from+1))+from;
+}
+
+function createRandomData(n){
+  let data="";
+  let min=65; 
+  let max=90;
+  for(let j=0;j<n;j++){
+    let nachname=String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max));
+    let vorname=String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max))+String.fromCodePoint(random(min,max));
+
+    let wahlen=[1,2,3,4];
+    for(let i=0;i<40;i++){
+      let a=random(0,3);
+      let b=random(0,3);
+      let c=wahlen[a];
+      wahlen[a]=wahlen[b];
+      wahlen[b]=c;
+    }
+    data+=nachname+", "+vorname+";;"+wahlen.join(", ")+"\n";
+  }
+  console.log(data);
+}
+
+createRandomData(100);

@@ -7,6 +7,16 @@ export default class Teilnehmer{
     this.wahlen=wahlen;
   }
 
+  getWahl(kurs){
+    for(let i=0;i<this.wahlen.length;i++){
+      let w=this.wahlen[i];
+      if(w===kurs){
+        return i;
+      }
+    }
+    return -1;
+  }
+
   toJSON(){
     let data={
       nachname: this.nachname,

@@ -9,9 +9,27 @@ export default class Kurs{
     this.maxStufe=maxStufe;
     this.minTeilnehmer=minTeilnehmer;
     this.maxTeilnehmer=maxTeilnehmer;
-    this.teilnehmer=[];
     this.interessenten=[];
     this.auffuellbar=auffuellbar;
+  }
+
+  getTeilnehmerCountsByWahl(anzWahlen){
+    let total=this.teilnehmer.length;
+    let counts=[];
+    for(let i=0;i<anzWahlen+1;i++){
+      counts[i]=0;
+    }
+    for(let i=0;i<total;i++){
+      let t=this.teilnehmer[i];
+      let wahl=t.getWahl(this);
+      if(wahl>=0 && wahl<anzWahlen){
+        counts[wahl]++;
+      }else{
+        counts[anzWahlen]++;
+      }
+    }
+    counts.push(total);
+    return counts;
   }
 
   toJSON(){
@@ -24,12 +42,7 @@ export default class Kurs{
       minTeilnehmer: this.minTeilnehmer,
       maxTeilnehmer: this.maxTeilnehmer,
       auffuellbar: this.auffuellbar,
-      teilnehmer: []
     };
-    for(let i=0;i<this.teilnehmer.length;i++){
-      let t=this.teilnehmer[i];
-      data.teilnehmer.push(t.index);
-    }
     return data;
   }
 
@@ -43,14 +56,5 @@ export default class Kurs{
     this.minTeilnehmer=data.minTeilnehmer;
     this.maxTeilnehmer=data.maxTeilnehmer;
     this.auffuellbar=data.auffuellbar;
-    this.teilnehmer=data.teilnehmer;
-  }
-
-  restoreTeilnehmer(teilnehmer){
-    for(let i=0;i<this.teilnehmer.length;i++){
-      let ti=this.teilnehmer[i];
-      let t=teilnehmer[ti];
-      this.teilnehmer[i]=t;
-    }
   }
 }

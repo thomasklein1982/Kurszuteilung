@@ -17,3 +17,12 @@ html,body{
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
 }
+
+table{
+  border-collapse: collapse;
+}
+
+table td,table th{
+  border: 1pt solid black;
+  text-align: left;
+}
