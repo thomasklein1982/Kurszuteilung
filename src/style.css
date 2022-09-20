@@ -1,0 +1,19 @@
+html,body{
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.ui-container{
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-items: stretch;
+}
+.ui-container *{
+  display: block;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+}
