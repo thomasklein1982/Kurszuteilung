@@ -1,6 +1,7 @@
 export default class Kurs{
 
-  constructor(index,name, id, beschreibung, minStufe,maxStufe, minTeilnehmer, maxTeilnehmer, auffuellbar){
+  constructor(projekt,index,name, id, beschreibung, minStufe,maxStufe, minTeilnehmer, maxTeilnehmer, auffuellbar){
+    this.projekt;
     this.index=index;
     this.name=name;
     this.id=id;

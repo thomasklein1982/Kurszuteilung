@@ -35,7 +35,7 @@ import zuordnung from "./Zuordnung.vue";
     },
     methods: {
       newZuordnung(){
-        let z=new Zuordnung();
+        let z=new Zuordnung(this.projekt);
         this.projekt.addZuordnung(z);
       },
       downloadProjekt(){

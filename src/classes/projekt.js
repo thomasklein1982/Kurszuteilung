@@ -14,6 +14,42 @@ export default class Projekt{
     };
   }
 
+  calc(){
+    this.calcInteressentenFuerKurse();
+  }
+
+  calcInteressentenFuerKurse(){
+    let teilnehmer=this.teilnehmer;
+    let anzWahlen=this.getAnzahlWahlen();
+    let kurse=this.kurse;
+    /**alle interessenten zuruecksetzen: */
+    for(let j=0;j<kurse.length;j++){
+      let k=kurse[j];
+      k.interessenten=[];
+      for(let i=0;i<anzWahlen;i++){
+        k.interessenten.push([]);
+      }
+    }
+    
+    for(let i=0;i<teilnehmer.length;i++){
+      let t=teilnehmer[i];
+      let wahlen=t.getWahlen();
+      for(let j=0;j<anzWahlen;j++){
+        let k=wahlen[j];
+        k.interessenten[j].push(t);
+      }
+    }
+  };
+
+  getTeilnehmerCopy(){
+    let array=[];
+    for(let i=0;i<this.teilnehmer.length;i++){
+      let t=this.teilnehmer[i];
+      array.push(t);
+    }
+    return array;
+  }
+
   addZuordnung(z){
     this.zuordnungen.push(z);
   }
@@ -61,21 +97,21 @@ export default class Projekt{
     this.kurse=[];
     for(let i=0;i<data.kurse.length;i++){
       let k=data.kurse[i];
-      let rk=new Kurs();
+      let rk=new Kurs(this);
       rk.fromJSON(k,i);
       this.kurse.push(rk);
     }
     this.teilnehmer=[];
     for(let i=0;i<data.teilnehmer.length;i++){
       let t=data.teilnehmer[i];
-      let rt=new Teilnehmer();
+      let rt=new Teilnehmer(this);
       rt.fromJSON(t,i,this.kurse);
       this.teilnehmer.push(rt);
     }
     this.zuordnungen=[]
     for(let i=0;i<data.zuordnungen.length;i++){
       let z=data.zuordnungen[i];
-      let rz=new Zuordnung();
+      let rz=new Zuordnung(this);
       rz.fromJSON(z);
       this.zuordnungen.push(rz);
     }

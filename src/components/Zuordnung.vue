@@ -2,20 +2,46 @@
   <div style="border: 1pt solid black">
     <Statistik :projekt="projekt" :zuordnung="zuordnung"/>
     <Button label="Weitersuchen" @click="weitersuchen()"/>
+    {{percent}}
     <Button label="Löschen" @click="deleteZuordnung()"/>
     <Button label="Liste herunterladen" @click="downloadListe()"/>
   </div>
 </template>
 
 <script>
-  import { download } from "../lib/helper";
+import { download,sleep } from "../lib/helper";
 import Statistik from "./Statistik.vue";
   export default {
     props: {
       projekt: Object,
       zuordnung: Object
     },
+    computed: {
+      strafe(){
+        if(this.zuordnung){
+          return this.zuordnung.calcStrafe();
+        }
+      }
+    },
+    data: ()=>{
+      return {
+        precent: 0
+      };
+    },
     methods: {
+      async weitersuchen(){
+        this.percent=0;
+        let count=100000;
+        let step=Math.ceil(count/1000);
+        let strafe=this.strafe;
+        for(let i=0;i<count;i++){
+          strafe=this.zuordnung.weitersuchen(strafe);
+          if(i%step===0){
+            this.percent+=10;
+            await sleep(10);
+          }
+        }
+      },
       deleteZuordnung(){
         let a=confirm("Zuordnung wirklich löschen?");
         if(a){

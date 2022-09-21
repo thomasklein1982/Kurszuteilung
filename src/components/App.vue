@@ -16,6 +16,7 @@ export default{
   },
   methods: {
     startProjekt(projekt){
+      projekt.calc();
       this.projekt=projekt;
     }
   },

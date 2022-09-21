@@ -18,7 +18,7 @@
     },
     computed: {
       infos(){
-        var statistik=this.zuordnung.getStatistik(this.projekt);
+        var statistik=this.zuordnung.getStatistik();
         return statistik;
         // var total=counts[counts.length-1];
         // var totalStrafe=0;

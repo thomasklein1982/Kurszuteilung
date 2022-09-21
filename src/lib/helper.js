@@ -118,3 +118,34 @@ export async function loadLocally(key){
   var data=JSON.parse(s);
   return data;
 }
+
+export function random(from,to){
+  return Math.floor(Math.random()*(to-from+1))+from;
+}
+
+export function randomize(array){
+  for(let i=0;i<array.length;i++){
+    let stelle=random(0,array.length-1);
+    let c=array[i];
+    array[i]=array[stelle];
+    array[stelle]=c;
+  }
+  return array;
+}
+
+export async function sleep(ms){
+  let p=new Promise((resolve,reject)=>{
+    setTimeout(()=>{
+      resolve();
+    },ms);
+  });
+  await p;
+}
+
+export function createRangeArray(from,to){
+  let array=[];
+  for(let i=from;i<=to;i++){
+    array.push(i);
+  }
+  return array;
+}

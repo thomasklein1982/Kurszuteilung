@@ -1,10 +1,29 @@
 export default class Teilnehmer{
-  constructor(index,nachname, vorname, stufe, wahlen){
+  constructor(projekt,index,nachname, vorname, stufe, wahlen){
     this.index=index;
+    this.projekt=projekt;
     this.nachname=nachname;
     this.vorname=vorname;
     this.stufe=stufe;
     this.wahlen=wahlen;
+  }
+
+  getWahlen(){
+    return this.wahlen;
+  }
+
+  getBesteWahl(nochFrei){
+    let anzWahlen=this.projekt.getAnzahlWahlen();
+    for(let i=0;i<anzWahlen;i++){
+      let k=this.wahlen[i];
+      if(nochFrei[k.index]>0){
+        return {
+          kurs: k,
+          wahlIndex: i
+        };
+      }
+    }
+    return null;
   }
 
   getWahl(kurs){
