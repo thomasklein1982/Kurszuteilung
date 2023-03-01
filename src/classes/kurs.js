@@ -1,7 +1,6 @@
 export default class Kurs{
 
-  constructor(projekt,index,name, id, beschreibung, minStufe,maxStufe, minTeilnehmer, maxTeilnehmer, auffuellbar){
-    this.projekt;
+  constructor(index,name, id, beschreibung, minStufe,maxStufe, minTeilnehmer, maxTeilnehmer, auffuellbar){
     this.index=index;
     this.name=name;
     this.id=id;
@@ -13,6 +12,8 @@ export default class Kurs{
     this.interessenten=[];
     this.auffuellbar=auffuellbar;
   }
+
+  
 
   getTeilnehmerCountsByWahl(anzWahlen){
     let total=this.teilnehmer.length;
