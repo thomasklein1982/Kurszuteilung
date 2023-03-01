@@ -106,5 +106,3 @@ function createRandomData(n){
   }
   console.log(data);
 }
-
-createRandomData(100);

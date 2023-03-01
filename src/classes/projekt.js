@@ -9,7 +9,6 @@ export default class Projekt{
     this.kurse=null;
     this.zuordnungen=[];
     this.settings={
-      anzWahlen: 4,
       strafen: "0;10;30;60;100"
     };
   }
@@ -62,7 +61,7 @@ export default class Projekt{
   }
 
   getAnzahlWahlen(){
-    return this.settings.anzWahlen*1;
+    return this.settings.strafen.split(";").length-1;
   }
 
   getStrafen(){
@@ -93,7 +92,11 @@ export default class Projekt{
 
   fromJSON(data){
     this.name=data.name;
-    this.settings=data.settings;
+    for(let a in this.settings){
+      if(a in data.settings){
+        this.settings[a]=data.settings[a];
+      }
+    }
     this.kurse=[];
     for(let i=0;i<data.kurse.length;i++){
       let k=data.kurse[i];

@@ -5,6 +5,7 @@ html,body{
   margin: 0;
 }
 
+
 .ui-container{
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;
@@ -12,7 +13,7 @@ html,body{
   flex-direction: column;
   justify-items: stretch;
 }
-.ui-container *{
+.ui-container>*{
   display: block;
   margin-top: 0.2rem;
   margin-bottom: 0.2rem;

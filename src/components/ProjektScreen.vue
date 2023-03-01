@@ -2,13 +2,12 @@
   <Screen>
     <Dialog v-model:visible="dialogSettings.show" header="Projekt-Einstellungen">
       <div class="ui-container">
-        <InputText type="number" v-model="projekt.settings.anzWahlen" placeholder="Anzahl Wahlen"/>
         <InputText type="text" v-model="projekt.settings.strafen" placeholder="Strafen (; getrennt)"/>
       </div>
     </Dialog>
     <Button label="Projekt herunterladen" @click="downloadProjekt()"/>
     <Button label="Einstellungen" @click="dialogSettings.show=true"/>
-    <h1>Zuordnngen</h1>
+    <h1>Zuordnungen</h1>
     <template v-for="(z,i) in projekt.zuordnungen">
       <zuordnung :projekt="projekt" :zuordnung="z"/>
     </template>

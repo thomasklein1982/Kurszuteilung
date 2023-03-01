@@ -15,9 +15,12 @@ export default defineConfig({
     VitePWA({
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png', 'icon-transparent.png','Logo.png', 'additionalJSCode.js','icon-transparent.png','assets/primeicons.c9eaf535.eot'],  
       //assetsInclude: ["assets/*.ttf"],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,eot,woff,woff2}']
+      },
       manifest: {
-        name: 'JavaApp',
-        description: 'Erstelle deine eigenen Apps mit Java',
+        name: 'Kurszuteilung',
+        description: 'Ordne Teilnehmer Kursen zu.',
         theme_color: '#ffffff',
         icons: [
           {

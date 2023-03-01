@@ -2,7 +2,30 @@
   <Screen>
     <Dialog v-model:visible="dialogNewProjekt.show" header="Neues Projekt">
       <div class="ui-container">
-        <InputText v-model="dialogNewProjekt.name"/>
+        <Accordion>
+          <AccordionTab header="Kurs-Datei">
+            <div>
+              Die Kursdatei muss eine CSV-Datei sein (mit Semikolon getrennt) nach folgendem Schema:
+              <table>
+                <tr><th>Name</th><th>id</th><th>beschreibung</th><th>Jahrgangsstufe mindestens</th><th>Jahrgangsstufe höchstens</th><th>Teilnehmerzahl mindestens</th><th>Teilnehmerzahl höchstens</th><th>Auffüllbar?</th></tr>
+                <tr><td>beliebiger String</td><td>eindeutiger String ohne Leerzeichen</td><td>Beliebiger String</td><td>ganze Zahl</td><td>ganze Zahl</td><td>ganze Zahl</td><td>ganze Zahl</td><td>true/false: Darf der Kurs mit Teilnehmern aufgefüllt werden, die ihn nicht gewählt haben? (Bsp: Ein Orchester-Kurs sollte nicht aufgefüllt werden.)</td></tr>
+                <tr><td>Gesundes Kochen</td><td>2</td><td>Hier lernen wir zu kochen.</td><td>6</td><td>11</td><td>6</td><td>12</td><td>true</td></tr>
+              </table>
+            </div>
+          </AccordionTab>
+          <AccordionTab header="Teilnehmer-Datei">
+            <div>
+              Die Teilnehmerdatei muss eine CSV-Datei sein (mit Semikolon getrennt) nach folgendem Schema:
+              <table>
+                <tr><th>Name</th><th>Stufe</th><th>Wahlen</th></tr>
+                <tr><td>Nachname, Vorname</td><td>ganze Zahl</td><td>Nummern der Projekte mit Komma getrennt</td></tr>
+                <tr><td>Klein, Thomas</td><td>12</td><td>17,2,45,3</td></tr>
+              </table>
+            </div>
+          </AccordionTab>
+        </Accordion>
+        <InputText placeholder="Name des Projekts" v-model="dialogNewProjekt.name"/>
+        
         <Button :disabled="dialogNewProjekt.name.trim().length===0" label="Kurse hochladen (csv)" @click="uploadKurse()" />
         <Button :disabled="dialogNewProjekt.kurse===null" label="Teilnehmer hochladen (csv)" @click="uploadTeilnehmer()" />
       </div>
@@ -11,7 +34,6 @@
     <h1>Kurszuteilung</h1>
     <Button label="Projekt hochladen" @click="uploadProjekt()" />
     <Button label="Neues Projekt" @click="dialogNewProjekt.show=true"/>
-    
     
   </Screen>
 </template>
@@ -22,6 +44,8 @@ import Screen from "./Screen.vue";
 import Kurs from "../classes/kurs";
 import Projekt from "../classes/projekt";
 import Teilnehmer from "../classes/teilnehmer";
+import Accordion from "primevue/accordion";
+import AccordionTab from "primevue/accordiontab";
 
 export default{
   data: ()=>{
@@ -74,7 +98,7 @@ export default{
           let k=this.getKursById(w);
           kurse.push(k);
         }
-        let t=new Teilnehmer(i,name[0].trim(),name[1].trim(),stufe,kurse);
+        let t=new Teilnehmer(i-1,name[0].trim(),name[1].trim(),stufe,kurse);
         teilnehmer.push(t);
       }
       console.log(teilnehmer);
@@ -97,7 +121,7 @@ export default{
     }
   },
   components: {
-    Screen
+    Screen, Accordion, AccordionTab
   }
 }
 </script>

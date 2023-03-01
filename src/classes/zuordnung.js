@@ -44,28 +44,29 @@ export default class Zuordnung{
     let wahlen=[];
     for(let i=0;i<anzWahlen+1;i++){
       wahlen[i]={
-        name: i===anzWahlen? "keine Wahl" : (i+1)+". Wahl",
-        count: 0,
+        name: i===anzWahlen? "Ohne Zuteilung" : (i+1)+". Wahl",
+        teilnehmer: [],
         strafe: 0
       };
     }
     for(let i=0;i<this.projekt.teilnehmer.length;i++){
+      let t=this.projekt.teilnehmer[i];
       let z=this.kursZuteilung[i];
       let k=this.projekt.kurse[z];
       if(k){
-        let w=this.projekt.teilnehmer[i].getWahl(k);
+        let w=t.getWahl(k);
         if(w>=0 && w<anzWahlen){
-          wahlen[w].count++;
+          wahlen[w].teilnehmer.push(t);
         }else{
-          wahlen[anzWahlen].count++;
+          wahlen[anzWahlen].teilnehmer.push(t);
         }
       }else{
-        wahlen[anzWahlen].count++;
+        wahlen[anzWahlen].teilnehmer.push(t);
       }
     }
     let strafeGesamt=0;
     for(let i=0;i<Math.min(wahlen.length,strafen.length);i++){
-      let s=wahlen[i].count*strafen[i];
+      let s=wahlen[i].teilnehmer.length*strafen[i];
       wahlen[i].strafe=s;
       strafeGesamt+=s;
     }
@@ -104,7 +105,7 @@ export default class Zuordnung{
     for(let i=0;i<teilnehmer.length;i++){
       let index=order[i];
       let t=teilnehmer[index];
-      let wahl=t.getBesteWahl(nochFrei);
+      let wahl=t.getBesteWahl(nochFrei,anzWahlen);
       let s;
       if(wahl){
         z.ordneZu(t,wahl.kurs);
@@ -114,7 +115,7 @@ export default class Zuordnung{
         s=strafen[strafen.length-1];
       }
       strafe+=s;
-      if(strafe>besteStrafe){
+      if(besteStrafe>=0 && strafe>besteStrafe){
         return -1;
       }
       // let w=Math.random();
@@ -150,6 +151,7 @@ export default class Zuordnung{
 
   getKurse(){
     let kurse=this.projekt.kurse;
+    let anzahlWahlen=this.projekt.getAnzahlWahlen();
     let teilnehmer=this.projekt.teilnehmer;
     let gruppen={};
     let ohneKurs=[];
@@ -163,9 +165,14 @@ export default class Zuordnung{
       if(k){
         let t=teilnehmer[i];
         if(!gruppen[k.id]){
-          gruppen[k.id]=[];
+          gruppen[k.id]=[[]];
+          for(let j=0;j<anzahlWahlen;j++){
+            gruppen[k.id].push([]);
+          }
         }
-        gruppen[k.id].push(t);
+        let wahl=t.getWahl(k);
+        if(wahl===-1) wahl=anzahlWahlen;
+        gruppen[k.id][wahl].push(t);
         ohneKurs[i]=false;
       }
     }
@@ -173,10 +180,34 @@ export default class Zuordnung{
     for(let i=0;i<kurse.length;i++){
       let k=kurse[i];
       let g=gruppen[k.id];
-      if(!g) g=[];
+      if(!g){
+        g=[[]];
+        for(let j=0;j<anzahlWahlen;j++){
+          g.push([]);
+        }
+      }
       array.push({
         kurs: k,
-        teilnehmer: g
+        teilnehmer: g,
+        alleTeilnehmer: []
+      });
+    }
+
+    for(let i=0;i<array.length;i++){
+      let k=array[i];
+      k.alleTeilnehmer=[];
+      for(let j=0;j<k.teilnehmer.length;j++){
+        let g=k.teilnehmer[j];
+        for(let l=0;l<g.length;l++){
+          k.alleTeilnehmer.push(g[l]);
+        }
+      }
+      k.alleTeilnehmer.sort((a,b)=>{
+        if(a.nachname<b.nachname || a.nachname===b.nachname && a.vorname<b.vorname){
+          return -1;
+        }else{
+          return 1;
+        }
       });
     }
 
@@ -189,7 +220,7 @@ export default class Zuordnung{
     }
     array.push({
       kurs: null,
-      teilnehmer: ohne
+      alleTeilnehmer: ohne
     });
     return array;
   }

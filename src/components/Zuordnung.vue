@@ -1,16 +1,28 @@
 <template>
   <div style="border: 1pt solid black">
-    <Statistik :projekt="projekt" :zuordnung="zuordnung"/>
-    <Button label="Weitersuchen" @click="weitersuchen()"/>
-    {{percent}}
+    <Statistik :projekt="projekt" :zuordnung="zuordnung" @details="$event=>showDetails($event)"/>
+    <div v-if="suchen">Suche läuft {{ suchenIndikator?'/':'\\' }}</div>
+    <Button :disabled="suchen" label="Weitersuchen" @click="weitersuchen()"/>
+    <Button :disabled="!suchen" label="Suche stoppen" @click="stop()"/>
     <Button label="Löschen" @click="deleteZuordnung()"/>
-    <Button label="Liste herunterladen" @click="downloadListe()"/>
+    <Button label="Ergebnisse" :disabled="suchen" @click="$refs.resultsDialog.open()"/>
   </div>
+  <Dialog v-model:visible="detailsDialog.show" :header="detailsDialog.infos?.name">
+    <table v-if="detailsDialog.infos">
+      <tr><th>Teilnehmer</th><th>Stufe</th><th>Wahlen</th></tr>
+      <tr v-for="(t,i) in detailsDialog.infos.teilnehmer">
+        <td>{{ t.nachname }}, {{ t.vorname }}</td><td>{{ t.stufe }}</td><td>{{ t.getWahlenIDs().join(', ') }}</td>
+      </tr>
+    </table>
+  </Dialog>
+  <DialogResults ref="resultsDialog" :projekt="projekt" :zuordnung="zuordnung"/>
 </template>
 
 <script>
-import { download,sleep } from "../lib/helper";
+import { sleep } from "../lib/helper";
 import Statistik from "./Statistik.vue";
+import DialogResults from "./DialogResults.vue";
+
   export default {
     props: {
       projekt: Object,
@@ -21,52 +33,52 @@ import Statistik from "./Statistik.vue";
         if(this.zuordnung){
           return this.zuordnung.calcStrafe();
         }
-      }
+      } 
     },
-    data: ()=>{
+    data(){
       return {
-        precent: 0
+        suchen: false,
+        suchenIndikator: true,
+        detailsDialog: {
+          show: false,
+          infos: null
+        }
       };
     },
     methods: {
+      showDetails(infos){
+        this.detailsDialog.infos=infos;
+        this.detailsDialog.show=true;
+      },
       async weitersuchen(){
-        this.percent=0;
-        let count=100000;
-        let step=Math.ceil(count/1000);
+        this.suchen=true;
+        let step=10;
         let strafe=this.strafe;
-        for(let i=0;i<count;i++){
-          strafe=this.zuordnung.weitersuchen(strafe);
+        let i=0;
+        while(this.suchen && strafe!==0){
+          let neueStrafe=this.zuordnung.weitersuchen(strafe);
+          if(neueStrafe>=0){
+            strafe=neueStrafe;
+          }
+          i++;
           if(i%step===0){
-            this.percent+=10;
+            this.suchenIndikator=!this.suchenIndikator;
+            i=0;
             await sleep(10);
           }
         }
+        this.suchen=false;
+      },
+      stop(){
+        this.suchen=false;
       },
       deleteZuordnung(){
         let a=confirm("Zuordnung wirklich löschen?");
         if(a){
           this.projekt.removeZuordnung(this.zuordnung);
         }
-      },
-      downloadListe(){
-        let kurse=this.zuordnung.getKurse(this.projekt.kurse,this.projekt.teilnehmer);
-        let text="";
-        for(let i=0;i<kurse.length;i++){
-          let k=kurse[i];
-          if(k.kurs){
-            text+="Kurs "+k.kurs.name+":\n\n";
-          }else{
-            text+="Ohne Kurs:\n";
-          }
-          for(let j=0;j<k.teilnehmer.length;j++){
-            let t=k.teilnehmer[j];
-            text+=t.nachname+";"+t.vorname+";\n";
-          }
-          text+="\n\n";
-        }
-        download(text,this.projekt.name+"-Zuordnung.csv");
       }
     },
-    components: {Statistik}
+    components: {Statistik,DialogResults}
   }
 </script>

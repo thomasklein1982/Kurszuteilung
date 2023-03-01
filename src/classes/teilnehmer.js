@@ -1,20 +1,44 @@
+import Kurs from "./kurs";
+
 export default class Teilnehmer{
-  constructor(projekt,index,nachname, vorname, stufe, wahlen){
+  constructor(index,nachname, vorname, stufe, wahlen){
     this.index=index;
-    this.projekt=projekt;
     this.nachname=nachname;
     this.vorname=vorname;
     this.stufe=stufe;
     this.wahlen=wahlen;
+    /**Falls es Kurse nicht gibt, muessen die Luecken aufgefuellt werden */
+    let lastWahl=-1;
+    for(let i=0;i<this.wahlen.length;i++){
+      if(this.wahlen[i]){
+        lastWahl=i;
+        break;
+      }
+    }
+    if(lastWahl<0){
+      alert("Problem: Teilnehmer "+this.index+" ("+this.nachname+", "+this.vorname+" aus Stufe "+this.stufe+") hat keine existierenden Kurse gewählt.\nDer Teilnehmer wird nicht zugeordnet.");
+      this.ignorieren=true;
+      return;
+    }
+    this.ignorieren=false;
+    for(let i=0;i<lastWahl;i++){
+      this.wahlen[i]=this.wahlen[lastWahl];
+    }
+    for(let i=lastWahl+1;i<this.wahlen.length;i++){
+      if(!this.wahlen[i]){
+        this.wahlen[i]=this.wahlen[lastWahl];
+      }else{
+        lastWahl=i;
+      }
+    }
   }
 
   getWahlen(){
     return this.wahlen;
   }
 
-  getBesteWahl(nochFrei){
-    let anzWahlen=this.projekt.getAnzahlWahlen();
-    for(let i=0;i<anzWahlen;i++){
+  getBesteWahl(nochFrei, anzahlWahlen){
+    for(let i=0;i<anzahlWahlen;i++){
       let k=this.wahlen[i];
       if(nochFrei[k.index]>0){
         return {
@@ -26,6 +50,11 @@ export default class Teilnehmer{
     return null;
   }
 
+  /**
+   * Liefert den Index der Wahl zurück, die diesem Kurs entspricht (-1, wenn Kurs nicht gewählt wurde)
+   * @param {Kurs} kurs 
+   * @returns 
+   */
   getWahl(kurs){
     for(let i=0;i<this.wahlen.length;i++){
       let w=this.wahlen[i];
@@ -41,13 +70,27 @@ export default class Teilnehmer{
       nachname: this.nachname,
       vorname: this.vorname,
       stufe: this.stufe,
-      wahlen: []
+      wahlen: this.getWahlenIndices().join(", ")
     };
+    return data;
+  }
+
+  getWahlenIndices(){
+    let wahlen=[];
     for(let i=0;i<this.wahlen.length;i++){
       let k=this.wahlen[i];
-      data.wahlen.push(k.index);
+      wahlen.push(k.index);
     }
-    return data;
+    return wahlen;
+  }
+
+  getWahlenIDs(){
+    let wahlen=[];
+    for(let i=0;i<this.wahlen.length;i++){
+      let k=this.wahlen[i];
+      wahlen.push(k.id);
+    }
+    return wahlen;
   }
 
   fromJSON(data,index,kurse){

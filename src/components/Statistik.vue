@@ -2,7 +2,7 @@
   <table>
     <tr><th>Wahl</th><th>Anzahl</th><th>%</th><th>Strafe</th></tr>
     <tr v-for="(s,i) in infos.wahlen">
-      <td>{{s.name}}</td><td>{{s.count}}</td><td>{{(100*s.count/infos.total.count).toFixed(2)}}%</td><td>{{s.strafe}}</td>
+      <td>{{s.name}}</td><td>{{s.teilnehmer.length}}</td><td>{{(100*s.teilnehmer.length/infos.total.count).toFixed(2)}}%</td><td>{{s.strafe}}</td><td><Button icon="pi pi-search" @click="$event=>$emit('details',s)"/></td>
     </tr>
     <tr style="border-top: 2pt solid black">
       <th>Gesamt</th><td>{{infos.total.count}}</td><td>100%</td><td>{{infos.total.strafe}}</td>
