@@ -1,62 +1,60 @@
 export default class Kurs{
-
-  constructor(index,name, id, beschreibung, minStufe,maxStufe, minTeilnehmer, maxTeilnehmer, auffuellbar){
-    this.index=index;
-    this.name=name;
-    this.id=id;
-    this.beschreibung=beschreibung;
-    this.minStufe=minStufe;
-    this.maxStufe=maxStufe;
-    this.minTeilnehmer=minTeilnehmer;
-    this.maxTeilnehmer=maxTeilnehmer;
-    this.interessenten=[];
-    this.auffuellbar=auffuellbar;
+  constructor(angebot,zeitslot){
+    this.angebot=angebot;
+    this.zeitslot=zeitslot;
+    this.teilnehmer=[];
   }
 
-  
+  getAngebotName(){
+    return this.angebot.name;
+  }
 
-  getTeilnehmerCountsByWahl(anzWahlen){
-    let total=this.teilnehmer.length;
-    let counts=[];
-    for(let i=0;i<anzWahlen+1;i++){
-      counts[i]=0;
-    }
-    for(let i=0;i<total;i++){
-      let t=this.teilnehmer[i];
-      let wahl=t.getWahl(this);
-      if(wahl>=0 && wahl<anzWahlen){
-        counts[wahl]++;
-      }else{
-        counts[anzWahlen]++;
-      }
-    }
-    counts.push(total);
-    return counts;
+  getAngebotId(){
+    return this.angebot.getId();
+  }
+
+  getZeitslot(){
+    return this.zeitslot;
+  }
+
+  addTeilnehmer(t){
+    this.teilnehmer.push(t);
+  }
+
+  getTeilnehmer(index){
+    return this.teilnehmer[index];
+  }
+
+  getAnzahlTeilnehmer(){
+    return this.teilnehmer.length;
+  }
+
+  hatNochPlatz(){
+    return this.teilnehmer.length<this.angebot.maxTeilnehmer;
   }
 
   toJSON(){
     let data={
-      name: this.name,
-      id: this.id,
-      beschreibung: this.beschreibung,
-      minStufe: this.minStufe,
-      maxStufe: this.maxStufe,
-      minTeilnehmer: this.minTeilnehmer,
-      maxTeilnehmer: this.maxTeilnehmer,
-      auffuellbar: this.auffuellbar,
+      angebotId: this.angebot.getId(),
+      zeitslot: this.zeitslot
     };
+    let tn=[];
+    for(let i=0;i<this.teilnehmer.length;i++){
+      tn.push(this.teilnehmer[i].getIndex())
+    }
+    data.teilnehmerIndices=tn;
     return data;
   }
 
-  fromJSON(data,index){
-    this.index=index;
-    this.id=data.id;
-    this.name=data.name;
-    this.beschreibung=data.beschreibung;
-    this.minStufe=data.minStufe;
-    this.maxStufe=data.maxStufe;
-    this.minTeilnehmer=data.minTeilnehmer;
-    this.maxTeilnehmer=data.maxTeilnehmer;
-    this.auffuellbar=data.auffuellbar;
+  static fromJSON(data,projekt){
+    let angebot=projekt.getAngebotById(data.angebotId);
+    let z=data.zeitslot;
+    let k=new Kurs(angebot,z);
+    for(let i=0;i<data.teilnehmerIndices.length;i++){
+      let index=data.teilnehmerIndices[i];
+      let t=projekt.getTeilnehmer(index);
+      k.addTeilnehmer(t);
+    }
+    return k;
   }
 }

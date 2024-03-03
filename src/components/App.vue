@@ -17,6 +17,7 @@ export default{
   methods: {
     startProjekt(projekt){
       projekt.calc();
+      window.app.projekt=projekt;
       this.projekt=projekt;
     }
   },

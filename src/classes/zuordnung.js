@@ -1,9 +1,19 @@
 import { createRangeArray, randomize } from "../lib/helper";
+import Kurs from "./kurs.js";
 
 export default class Zuordnung{
   constructor(projekt){
     this.projekt=projekt;
-    this.kursZuteilung=[];
+    this.kurse={};
+    for(let i=0;i<this.projekt.angebote.length;i++){
+      let a=this.projekt.angebote[i];
+      let id=a.getId();
+      this.kurse[id]=[];
+      for(let j=0;j<a.anzahlSlots;j++){
+        let k=new Kurs(a,a.getZeitslot(j));
+        this.kurse[id].push(k);
+      }
+    }
   }
 
   getCopy(){
@@ -20,17 +30,24 @@ export default class Zuordnung{
   }
 
   ordneZu(teilnehmer,kurs){
-    this.kursZuteilung[teilnehmer.index]=kurs.index;
+    kurs.addTeilnehmer(teilnehmer);
   }
 
   toJSON(){
     return {
-      kursZuteilung: this.kursZuteilung
+      kurse: this.kurse
     };
   }
 
   fromJSON(data){
-    this.kursZuteilung=data.kursZuteilung;
+    for(let a in data.kurse){
+      let kurse=data.kurse[a];
+      //let angebot=this.projekt.getAngebotById(a);
+      for(let i=0;i<kurse.length;i++){
+        let k=Kurs.fromJSON(kurse[i],this.projekt);//new Kurs(angebot,kurse[i].zeitslot)
+        this.kurse[a][i]=k;
+      }
+    }
   }
 
   calcStrafe(){
@@ -41,6 +58,7 @@ export default class Zuordnung{
   getStatistik(){
     let anzWahlen=this.projekt.getAnzahlWahlen();
     let strafen=this.projekt.getStrafen();
+    let zeitslots=this.projekt.getAnzahlZeitslots();
     let wahlen=[];
     for(let i=0;i<anzWahlen+1;i++){
       wahlen[i]={
@@ -49,20 +67,27 @@ export default class Zuordnung{
         strafe: 0
       };
     }
+    let nichtZugeteiltIndices={};
     for(let i=0;i<this.projekt.teilnehmer.length;i++){
       let t=this.projekt.teilnehmer[i];
-      let z=this.kursZuteilung[i];
-      let k=this.projekt.kurse[z];
-      if(k){
-        let w=t.getWahl(k);
-        if(w>=0 && w<anzWahlen){
-          wahlen[w].teilnehmer.push(t);
-        }else{
-          wahlen[anzWahlen].teilnehmer.push(t);
+      nichtZugeteiltIndices[t.index]=true;
+    }
+    for(let i=0;i<this.projekt.angebote.length;i++){
+      let a=this.projekt.angebote[i];
+      let kurse=this.kurse[a.getId()];
+      for(let j=0;j<kurse.length;j++){
+        let k=kurse[j];
+        for(let ti=0;ti<k.getAnzahlTeilnehmer();ti++){
+          let t=k.getTeilnehmer(ti);
+          let wahl=t.getWahl(a);
+          if(wahl<0) wahl=anzWahlen;
+          wahlen[wahl].teilnehmer.push(t);
+          delete nichtZugeteiltIndices[t.index];
         }
-      }else{
-        wahlen[anzWahlen].teilnehmer.push(t);
       }
+    }
+    for(let index in nichtZugeteiltIndices){
+      wahlen[anzWahlen].teilnehmer.push(this.projekt.getTeilnehmer(index));
     }
     let strafeGesamt=0;
     for(let i=0;i<Math.min(wahlen.length,strafen.length);i++){
@@ -82,13 +107,9 @@ export default class Zuordnung{
   weitersuchen(besteStrafe){
     let strafe=0;
     let z=new Zuordnung(this.projekt);
-    let nochFrei=[];
-    for(let i=0;i<this.projekt.kurse.length;i++){
-      let k=this.projekt.kurse[i];
-      nochFrei[i]=k.maxTeilnehmer;
-    }
     let anzWahlen=this.projekt.getAnzahlWahlen();
     let strafen=this.projekt.getStrafen();
+    let anzahlSlots=this.projekt.getAnzahlZeitslots();
     /**Algorithmus:
      * 1. Fuelle alle Kurse bis zur Mindest-Teilnehmerzahl
      * 2. Bringe uebrige Teilnehmer in zufaellige Reihenfolge
@@ -96,7 +117,7 @@ export default class Zuordnung{
      *  a) bestimme Anziehung der gewaehlten Kurse auf diesen TN
      *  b) ordne den TN nach dieser Verteilung einer seiner Wahlen zu
      */
-     let teilnehmer=this.projekt.getTeilnehmerCopy();
+     let teilnehmer=this.projekt.teilnehmer;
     /**fuellen bis zur Mindestzahl */
     
     /**zufaellige Reihenfolge */
@@ -105,12 +126,10 @@ export default class Zuordnung{
     for(let i=0;i<teilnehmer.length;i++){
       let index=order[i];
       let t=teilnehmer[index];
-      let wahl=t.getBesteWahl(nochFrei,anzWahlen);
+      let kurse=t.getBesteWahl(z.kurse,strafen,anzahlSlots);
       let s;
-      if(wahl){
-        z.ordneZu(t,wahl.kurs);
-        nochFrei[wahl.kurs.index]--;
-        s=strafen[wahl.wahlIndex];
+      if(kurse){
+        s=kurse.strafe;
       }else{
         s=strafen[strafen.length-1];
       }
@@ -149,7 +168,21 @@ export default class Zuordnung{
     return array;
   }
 
-  getKurse(){
+  getKurseNachZeitslot(){
+    let kurseNachZeitslot=[];
+    let anzahlSlots=this.projekt.getAnzahlZeitslots();
+    for(let i=0;i<anzahlSlots;i++){
+      kurseNachZeitslot.push([]);
+    }
+    for(let a in this.kurse){
+      let kurse=this.kurse[a];
+      for(let i=0;i<kurse.length;i++){
+        let k=kurse[i];
+        kurseNachZeitslot[k.getZeitslot()-1].push(k);
+      }
+    }
+    return kurseNachZeitslot;
+
     let kurse=this.projekt.kurse;
     let anzahlWahlen=this.projekt.getAnzahlWahlen();
     let teilnehmer=this.projekt.teilnehmer;

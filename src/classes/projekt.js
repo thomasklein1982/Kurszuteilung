@@ -1,29 +1,53 @@
 import Teilnehmer from "./teilnehmer";
-import Kurs from "./kurs";
+import Angebot from "./angebot";
 import Zuordnung from "./zuordnung";
 
 export default class Projekt{
-  constructor(name){
-    this.name=name;
+  constructor(){
+    this.name="";
+    this.slotCount=1;
     this.teilnehmer=null;
-    this.kurse=null;
+    this.angebote=null;
     this.zuordnungen=[];
     this.settings={
       strafen: "0;10;30;60;100"
     };
   }
 
-  calc(){
-    this.calcInteressentenFuerKurse();
+  setName(name){
+    this.name=name;
+  }
+  setSlotCount(count){
+    this.slotCount=count;
+  }
+  getAnzahlZeitslots(){
+    return this.slotCount;
+  }
+  getTeilnehmer(index){
+    return this.teilnehmer[index];
   }
 
-  calcInteressentenFuerKurse(){
+  getAngebotById(id){
+    for(let i=0;i<this.angebote.length;i++){
+      let k=this.angebote[i];
+      if(k.id===id){
+        return k;
+      }
+    }
+    return null;
+  }
+
+  calc(){
+    this.calcInteressentenFuerAngebote();
+  }
+
+  calcInteressentenFuerAngebote(){
     let teilnehmer=this.teilnehmer;
     let anzWahlen=this.getAnzahlWahlen();
-    let kurse=this.kurse;
+    let angebote=this.angebote;
     /**alle interessenten zuruecksetzen: */
-    for(let j=0;j<kurse.length;j++){
-      let k=kurse[j];
+    for(let j=0;j<angebote.length;j++){
+      let k=angebote[j];
       k.interessenten=[];
       for(let i=0;i<anzWahlen;i++){
         k.interessenten.push([]);
@@ -35,7 +59,9 @@ export default class Projekt{
       let wahlen=t.getWahlen();
       for(let j=0;j<anzWahlen;j++){
         let k=wahlen[j];
-        k.interessenten[j].push(t);
+        if(k){
+          k.interessenten[j].push(t);
+        }
       }
     }
   };
@@ -80,8 +106,8 @@ export default class Projekt{
     for(let i=0;i<anzWahlen+2;i++){
       counts[i]=0;
     }
-    for(let i=0;i<this.kurse.length;i++){
-      let k=this.kurse[i];
+    for(let i=0;i<this.angebote.length;i++){
+      let k=this.angebote[i];
       let c=k.getTeilnehmerCountsByWahl(anzWahlen);
       for(let j=0;j<anzWahlen+2;j++){
         counts[j]+=c[j];
@@ -92,26 +118,27 @@ export default class Projekt{
 
   fromJSON(data){
     this.name=data.name;
+    this.slotCount=data.slotCount;
     for(let a in this.settings){
       if(a in data.settings){
         this.settings[a]=data.settings[a];
       }
     }
-    this.kurse=[];
-    for(let i=0;i<data.kurse.length;i++){
-      let k=data.kurse[i];
-      let rk=new Kurs(this);
+    this.angebote=[];
+    for(let i=0;i<data.angebote.length;i++){
+      let k=data.angebote[i];
+      let rk=new Angebot();
       rk.fromJSON(k,i);
-      this.kurse.push(rk);
+      this.angebote.push(rk);
     }
     this.teilnehmer=[];
     for(let i=0;i<data.teilnehmer.length;i++){
       let t=data.teilnehmer[i];
       let rt=new Teilnehmer(this);
-      rt.fromJSON(t,i,this.kurse);
+      rt.fromJSON(t,i,this);
       this.teilnehmer.push(rt);
     }
-    this.zuordnungen=[]
+    this.zuordnungen=[];
     for(let i=0;i<data.zuordnungen.length;i++){
       let z=data.zuordnungen[i];
       let rz=new Zuordnung(this);

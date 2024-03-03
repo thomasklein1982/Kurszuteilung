@@ -55,7 +55,7 @@ import DialogResults from "./DialogResults.vue";
         let step=10;
         let strafe=this.strafe;
         let i=0;
-        while(this.suchen && strafe!==0){
+        do{
           let neueStrafe=this.zuordnung.weitersuchen(strafe);
           if(neueStrafe>=0){
             strafe=neueStrafe;
@@ -66,7 +66,7 @@ import DialogResults from "./DialogResults.vue";
             i=0;
             await sleep(10);
           }
-        }
+        }while(this.suchen && strafe!==0);
         this.suchen=false;
       },
       stop(){

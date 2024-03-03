@@ -1,24 +1,27 @@
 <template>
-  <table v-if="kurse">
-    <tr><th>Kurs</th><th>ID</th><th>Teilnehmer</th><th v-for="(c,i) in captions">{{ c }}</th></tr>
-    <tr v-for="(k,i) in kurse">
-      <template v-if="k.kurs">
-        <td>{{k.kurs.name}}</td>
-        <td>{{k.kurs.id}}</td>
-        <td>{{ k.alleTeilnehmer.length }} / {{ k.kurs.maxTeilnehmer }}</td>
-        <td v-for="(g,j) in k.teilnehmer">{{ g.length }} <span v-if="j<k.kurs.interessenten.length">/ {{ k.kurs.interessenten[j].length }}</span></td>
-        
-      </template>
-      <template v-else>
-        <td>Ohne Kurs</td>
-        <td>--</td>
-        <td>{{ k.alleTeilnehmer.length }}</td>
-        <td v-for="j in anzahlWahlen+1">--</td>
-      </template>
-      <td><Button icon="pi pi-search" @click="$event=>openDetails(k)"/></td>
-    </tr>
-  </table>
-  <Dialog :header="dialogDetails.kurs.kurs? dialogDetails.kurs.kurs.name+' ['+dialogDetails.kurs.kurs.id+']' : 'Ohne Kurszuordnung'" v-model:visible="dialogDetails.show">
+  <template v-if="kurseNachZeitslot">
+    <div v-for="(kurse,i) in kurseNachZeitslot">
+      <h1>Zeitslot {{ i+1 }}</h1>
+      <table>
+        <tr><th>Kurs</th><th>ID</th><th>Teilnehmer</th><th v-for="(c,i) in captions">{{ c }}</th></tr>
+        <tr v-for="(k,i) in kurse">
+          <td>{{k.getAngebotName()}}</td>
+          <td>{{k.getAngebotId()}}</td>
+          <td>{{ k.getAnzahlTeilnehmer() }} / {{ k.angebot.maxTeilnehmer }}</td>
+          <td v-for="(c,j) in captions">{{ -1 }} <span v-if="j<k.angebot.interessenten.length">/ {{ k.angebot.interessenten[j].length }}</span></td>
+            
+          <!-- <template v-else>
+            <td>Ohne Kurs</td>
+            <td>--</td>
+            <td>{{ k.alleTeilnehmer.length }}</td>
+            <td v-for="j in anzahlWahlen+1">--</td>
+          </template> -->
+          <td><Button icon="pi pi-search" @click="$event=>openDetails(k)"/></td>
+        </tr>
+      </table>
+    </div>
+  </template>
+  <!-- <Dialog :header="dialogDetails.kurs.kurs? dialogDetails.kurs.kurs.name+' ['+dialogDetails.kurs.kurs.id+']' : 'Ohne Kurszuordnung'" v-model:visible="dialogDetails.show">
     <table>
       <tr>
         <th>Nr.</th><th>Nachname</th><th>Vorname</th><th>Stufe</th><th>Wahlen</th>
@@ -31,13 +34,13 @@
         <td>{{ t.getWahlenIDs().join(', ') }}</td>
       </tr>
     </table>
-  </Dialog>
+  </Dialog> -->
 </template>
 
 <script>
   export default{
     props: {
-      kurse: Array,
+      kurseNachZeitslot: Array,
       anzahlWahlen: Number
     },
     computed: {
@@ -54,7 +57,7 @@
       return {
         dialogDetails: {
           show: false,
-          kurs: this.kurse[0].kurs
+          kurs: null//this.kurseNachZeitslot[0].kurs
         }
       }
     },

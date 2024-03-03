@@ -1,6 +1,6 @@
 <template>
   <Dialog v-model:visible="show" header="Ergebnisse">
-    <StatistikKurse :kurse="kurse" :anzahl-wahlen="projekt.getAnzahlWahlen()"/>
+    <StatistikKurse :kurse-nach-zeitslot="kurse" :anzahl-wahlen="projekt.getAnzahlWahlen()"/>
     <template #footer>
       <Button label="Liste herunterladen" @click="downloadListe()"/>
     </template>
@@ -24,25 +24,25 @@ export default {
   },
   methods: {
     open(){
-      this.kurse=this.zuordnung.getKurse(this.projekt.kurse,this.projekt.teilnehmer);
+      this.kurse=this.zuordnung.getKurseNachZeitslot();
       console.log(this.kurse);
       this.show=true;
     },
     downloadListe(){
       let text="";
-      let kurse=this.kurse;
-      for(let i=0;i<kurse.length;i++){
-        let k=kurse[i];
-        if(k.kurs){
-          text+="Kurs "+k.kurs.name+":\n\n";
-        }else{
-          text+="Ohne Kurs:\n";
+      for(let j=0;j<this.kurse.length;j++){
+        text+="Zeitslot "+(j+1)+"\n\n";
+        let kurse=this.kurse[j];
+        for(let i=0;i<kurse.length;i++){
+          let k=kurse[i];
+          text+="Kurs "+k.getAngebotName()+":\n\n";
+          
+          for(let ti=0;ti<k.teilnehmer.length;ti++){
+            let t=k.getTeilnehmer(ti);
+            text+=(ti+1)+";"+t.nachname+";"+t.vorname+";\n";
+          }
+          text+="\n\n";
         }
-        for(let j=0;j<k.alleTeilnehmer.length;j++){
-          let t=k.alleTeilnehmer[j];
-          text+=(j+1)+";"+t.nachname+";"+t.vorname+";\n";
-        }
-        text+="\n\n";
       }
       download(text,this.projekt.name+"-Zuordnung.csv");
     }
