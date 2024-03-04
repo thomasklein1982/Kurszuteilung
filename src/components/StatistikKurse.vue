@@ -8,7 +8,7 @@
           <td>{{k.getAngebotName()}}</td>
           <td>{{k.getAngebotId()}}</td>
           <td>{{ k.getAnzahlTeilnehmer() }} / {{ k.angebot.maxTeilnehmer }}</td>
-          <td v-for="(c,j) in captions">{{ -1 }} <span v-if="j<k.angebot.interessenten.length">/ {{ k.angebot.interessenten[j].length }}</span></td>
+          <td v-for="(c,j) in captions">{{ k.getAnzahlTeilnehmerNachWahl(j+1) }} <span v-if="j<k.angebot.interessenten.length">/ {{ k.angebot.interessenten[j].length }}</span></td>
             
           <!-- <template v-else>
             <td>Ohne Kurs</td>

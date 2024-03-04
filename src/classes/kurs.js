@@ -3,6 +3,7 @@ export default class Kurs{
     this.angebot=angebot;
     this.zeitslot=zeitslot;
     this.teilnehmer=[];
+    this.teilnehmerNachWahl=[];
   }
 
   getAngebotName(){
@@ -18,6 +19,11 @@ export default class Kurs{
   }
 
   addTeilnehmer(t){
+    let w=t.getWahl(this.angebot);
+    while(this.teilnehmerNachWahl.length<=w){
+      this.teilnehmerNachWahl.push([]);
+    }
+    this.teilnehmerNachWahl[w].push(t);
     this.teilnehmer.push(t);
   }
 
@@ -29,8 +35,20 @@ export default class Kurs{
     return this.teilnehmer.length;
   }
 
+  getAnzahlTeilnehmerNachWahl(wahl){
+    if(this.teilnehmerNachWahl.length<wahl){
+      return 0;
+    }else{
+      return this.teilnehmerNachWahl[wahl-1].length;
+    }
+  }
+
   hatNochPlatz(){
     return this.teilnehmer.length<this.angebot.maxTeilnehmer;
+  }
+
+  getFreiePlaetze(){
+    return this.angebot.maxTeilnehmer-this.teilnehmer.length;
   }
 
   toJSON(){

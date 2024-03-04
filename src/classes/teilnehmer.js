@@ -65,6 +65,7 @@ export default class Teilnehmer{
       zuordnung.push(0);
     }
     let suchen=true;
+    let besteZuordnung=null;
     while(suchen){
       let angebotIds={};
       //checken, ob das gleiche angebot mehrfach enthalten ist:
@@ -79,17 +80,22 @@ export default class Teilnehmer{
       }
       if(ok){
         let strafe=0;
+        let nebenStrafe=0;
         let kurse=[];
         for(let i=0;i<zuordnung.length;i++){
           let k=verfuegbareKurseNachZeitslots[i][zuordnung[i]];
           kurse[i]=k;
           strafe+=strafen[k.wahl];
-          k.kurs.addTeilnehmer(this);
+          nebenStrafe+=-k.kurs.getFreiePlaetze();
+          //k.kurs.addTeilnehmer(this);
         }
-        return {
-          kurse: kurse,
-          strafe
-        };
+        if(!besteZuordnung || strafe<besteZuordnung.strafe || strafe===besteZuordnung.strafe && nebenStrafe<besteZuordnung.nebenStrafe){
+          besteZuordnung={
+            kurse: kurse,
+            strafe,
+            nebenStrafe
+          }
+        }
       }
       let fertig=true;
       for(let i=0;i<zuordnung.length;i++){
@@ -106,7 +112,13 @@ export default class Teilnehmer{
         suchen=false;
       }
     }
-
+    if(besteZuordnung){
+      let slots=besteZuordnung.kurse; 
+      for(let i=0;i<slots.length;i++){
+        slots[i].kurs.addTeilnehmer(this);
+      }
+      return besteZuordnung;
+    }
     // for(let i=0;i<this.wahlen.length;i++){
     //   let a=this.wahlen[i];
     //   let kurse=alleKurse[a.getId()];
